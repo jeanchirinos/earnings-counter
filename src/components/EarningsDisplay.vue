@@ -51,8 +51,8 @@ const hasSalary = computed(() => monthlySalary.value !== null && monthlySalary.v
 </script>
 
 <template>
-  <div class="w-full max-w-3xl py-8 text-center">
-    <div v-if="!hasSalary" class="flex flex-col items-center gap-8 py-16">
+  <div class="w-full max-w-3xl py-4 text-center sm:py-8">
+    <div v-if="!hasSalary" class="flex flex-col items-center gap-8 py-8 sm:py-16">
       <p class="text-[0.8rem] uppercase tracking-[0.18em] text-cream-muted">
         Set your monthly salary below to start tracking
       </p>
@@ -61,31 +61,34 @@ const hasSalary = computed(() => monthlySalary.value !== null && monthlySalary.v
 
     <template v-else>
       <div
-        class="mb-5 inline-flex items-start gap-1 transition-opacity duration-200"
+        class="mb-3 inline-flex items-start gap-1 transition-opacity duration-200 sm:mb-5"
         :class="{ 'opacity-70': isPulsing }"
       >
-        <span class="pt-5 font-normal font-display text-[2.5rem] leading-none text-gold-dim"
+        <span
+          class="pt-3 font-normal font-display text-[1.5rem] leading-none text-gold-dim sm:pt-5 sm:text-[2.5rem]"
           >$</span
         >
         <div class="flex items-baseline">
           <span
-            class="font-bold font-display text-[7.5rem] leading-[0.88] tabular-nums tracking-[-0.03em] text-gold"
+            class="font-bold font-display text-[3.5rem] leading-[0.88] tabular-nums tracking-[-0.03em] text-gold sm:text-[7.5rem]"
           >
             {{ integerPart }}
           </span>
           <span
-            class="self-end pb-2.5 font-mono text-[2rem] tabular-nums tracking-[-0.01em] text-gold-dim"
+            class="self-end pb-1.5 font-mono text-[1.2rem] tabular-nums tracking-[-0.01em] text-gold-dim sm:pb-2.5 sm:text-[2rem]"
           >
             {{ decimalPart }}
           </span>
         </div>
       </div>
 
-      <p class="mb-10 text-[0.6rem] tracking-[0.35em] text-cream-muted">EARNED THIS MONTH</p>
+      <p class="mb-6 text-[0.6rem] tracking-[0.35em] text-cream-muted sm:mb-10">
+        EARNED THIS MONTH
+      </p>
 
-      <div class="mx-auto mb-10 h-10 w-px bg-border" />
+      <div class="mx-auto mb-6 h-10 w-px bg-border sm:mb-10" />
 
-      <div class="mb-14 flex items-center justify-center gap-12">
+      <div class="mb-8 flex items-center justify-center gap-8 sm:mb-14 sm:gap-12">
         <div class="flex flex-col gap-1.5">
           <span class="font-mono text-base tabular-nums tracking-[-0.01em] text-cream">
             +${{ perSecondFormatted }}
