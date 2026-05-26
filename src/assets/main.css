@@ -67,7 +67,7 @@
 
 @layer base {
   html {
-    font-size: 24px;
+    font-size: clamp(18px, 1.5vw + 9px, 24px);
   }
 
   body {
