@@ -114,12 +114,12 @@ const formattedSalary = computed(() => {
             </button>
             <div
               v-if="isCurrencyDropdownOpen"
-              class="absolute right-0 bottom-full mb-1.5 border border-border bg-bg-surface"
+              class="absolute right-0 bottom-full mb-1.5 flex flex-col min-w-[200px] border border-border bg-bg-surface overflow-hidden"
             >
               <button
                 v-for="currency in CURRENCIES"
                 :key="currency.code"
-                class="block w-full px-3 py-1.5 text-left font-mono text-[0.58rem] tracking-[0.2em] transition-colors cursor-pointer"
+                class="flex w-full items-center justify-between px-3 py-1.5 text-left font-mono text-[0.58rem] tracking-[0.2em] transition-colors cursor-pointer"
                 :class="
                   currency.code === selectedCurrency.code
                     ? 'bg-gold text-bg'
@@ -127,7 +127,8 @@ const formattedSalary = computed(() => {
                 "
                 @click="selectCurrency(currency.code)"
               >
-                {{ currency.code }}
+                <span>{{ currency.code }}</span>
+                <span class="ml-4 truncate tracking-[0.05em] opacity-60">{{ currency.name }}</span>
               </button>
             </div>
           </div>
