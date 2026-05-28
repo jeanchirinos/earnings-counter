@@ -20,7 +20,7 @@ export function useScheduleStorage() {
 
     try {
       const parsedSchedule = JSON.parse(storedScheduleString) as Partial<WorkSchedule>
-      
+
       const validatedSchedule: WorkSchedule = {
         isActive: parsedSchedule.isActive ?? DEFAULT_SCHEDULE.isActive,
         daysOfWeek: parsedSchedule.daysOfWeek ?? DEFAULT_SCHEDULE.daysOfWeek,

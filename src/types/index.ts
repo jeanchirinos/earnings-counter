@@ -5,6 +5,8 @@ export interface Currency {
   locale: string
 }
 
+export type Timeframe = 'today' | 'week' | 'month' | 'year'
+
 export interface WorkSchedule {
   isActive: boolean
   daysOfWeek: number[] // 0-6 (0 is Sunday, 1 is Monday, etc.)

@@ -1,4 +1,4 @@
-import type { WorkSchedule } from '@/types'
+import type { Timeframe, WorkSchedule } from '@/types'
 
 function parseTimeToSeconds(timeStr: string): number {
   const [hours, minutes] = timeStr.split(':').map(Number)
@@ -14,15 +14,48 @@ export function getDaysInCurrentMonth(): number {
   return daysInMonth
 }
 
-export function getTotalSecondsInMonth(schedule?: WorkSchedule): number {
-  const now = new Date()
+function getPeriodBounds({ timeframe, now }: { timeframe: Timeframe; now: Date }): {
+  start: Date
+  end: Date
+} {
   const year = now.getFullYear()
   const month = now.getMonth()
-  const daysInMonth = getDaysInCurrentMonth()
+  const date = now.getDate()
+
+  if (timeframe === 'today') {
+    const periodStart = new Date(year, month, date, 0, 0, 0, 0)
+    const periodEnd = new Date(year, month, date, 23, 59, 59, 999)
+    return { start: periodStart, end: periodEnd }
+  } else if (timeframe === 'week') {
+    const dayOfWeek = now.getDay()
+    const diffToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1
+    const periodStart = new Date(year, month, date - diffToMonday, 0, 0, 0, 0)
+    const periodEnd = new Date(year, month, date - diffToMonday + 6, 23, 59, 59, 999)
+    return { start: periodStart, end: periodEnd }
+  } else if (timeframe === 'month') {
+    const periodStart = new Date(year, month, 1, 0, 0, 0, 0)
+    const periodEnd = new Date(year, month + 1, 0, 23, 59, 59, 999)
+    return { start: periodStart, end: periodEnd }
+  } else {
+    const periodStart = new Date(year, 0, 1, 0, 0, 0, 0)
+    const periodEnd = new Date(year, 11, 31, 23, 59, 59, 999)
+    return { start: periodStart, end: periodEnd }
+  }
+}
+
+export function getTotalSecondsInPeriod({
+  timeframe,
+  schedule,
+}: {
+  timeframe: Timeframe
+  schedule?: WorkSchedule
+}): number {
+  const now = new Date()
+
+  const { start, end } = getPeriodBounds({ timeframe, now })
 
   if (!schedule || !schedule.isActive) {
-    const totalSeconds = daysInMonth * 24 * 3600
-    
+    const totalSeconds = Math.floor((end.getTime() - start.getTime() + 1) / 1000)
     return totalSeconds
   }
 
@@ -31,27 +64,35 @@ export function getTotalSecondsInMonth(schedule?: WorkSchedule): number {
   const endSeconds = parseTimeToSeconds(schedule.endTime)
   const dailySeconds = Math.max(0, endSeconds - startSeconds)
 
-  for (let day = 1; day <= daysInMonth; day++) {
-    const date = new Date(year, month, day)
-    
-    if (schedule.daysOfWeek.includes(date.getDay())) {
+  const currentDate = new Date(start)
+  currentDate.setHours(0, 0, 0, 0)
+
+  const endDate = new Date(end)
+  endDate.setHours(0, 0, 0, 0)
+
+  while (currentDate <= endDate) {
+    if (schedule.daysOfWeek.includes(currentDate.getDay())) {
       workableSeconds += dailySeconds
     }
+    currentDate.setDate(currentDate.getDate() + 1)
   }
 
   return workableSeconds
 }
 
-export function getElapsedSecondsThisMonth(schedule?: WorkSchedule): number {
+export function getElapsedSecondsInPeriod({
+  timeframe,
+  schedule,
+}: {
+  timeframe: Timeframe
+  schedule?: WorkSchedule
+}): number {
   const now = new Date()
-  const year = now.getFullYear()
-  const month = now.getMonth()
-  const currentDay = now.getDate()
+  const { start } = getPeriodBounds({ timeframe, now })
 
   if (!schedule || !schedule.isActive) {
-    const startOfMonth = new Date(year, month, 1, 0, 0, 0, 0)
-    const elapsedSeconds = Math.floor((now.getTime() - startOfMonth.getTime()) / 1000)
-
+    if (now.getTime() < start.getTime()) return 0
+    const elapsedSeconds = Math.floor((now.getTime() - start.getTime()) / 1000)
     return elapsedSeconds
   }
 
@@ -61,15 +102,22 @@ export function getElapsedSecondsThisMonth(schedule?: WorkSchedule): number {
   const dailySeconds = Math.max(0, endSeconds - startSeconds)
   const currentSeconds = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds()
 
-  for (let day = 1; day < currentDay; day++) {
-    const date = new Date(year, month, day)
+  const currentDate = new Date(start)
+  currentDate.setHours(0, 0, 0, 0)
 
-    if (schedule.daysOfWeek.includes(date.getDay())) {
+  const todayDate = new Date(now)
+  todayDate.setHours(0, 0, 0, 0)
+
+  if (now.getTime() < start.getTime()) return 0
+
+  while (currentDate < todayDate) {
+    if (schedule.daysOfWeek.includes(currentDate.getDay())) {
       elapsed += dailySeconds
     }
+    currentDate.setDate(currentDate.getDate() + 1)
   }
 
-  if (schedule.daysOfWeek.includes(now.getDay())) {
+  if (schedule.daysOfWeek.includes(now.getDay()) && currentDate.getTime() === todayDate.getTime()) {
     if (currentSeconds > startSeconds) {
       const todayElapsed = Math.min(currentSeconds, endSeconds) - startSeconds
       elapsed += todayElapsed
@@ -77,6 +125,14 @@ export function getElapsedSecondsThisMonth(schedule?: WorkSchedule): number {
   }
 
   return elapsed
+}
+
+export function getTotalSecondsInMonth(schedule?: WorkSchedule): number {
+  return getTotalSecondsInPeriod({ timeframe: 'month', schedule })
+}
+
+export function getElapsedSecondsThisMonth(schedule?: WorkSchedule): number {
+  return getElapsedSecondsInPeriod({ timeframe: 'month', schedule })
 }
 
 export function calculateEarnings({
