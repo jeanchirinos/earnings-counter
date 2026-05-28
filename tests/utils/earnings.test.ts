@@ -4,6 +4,7 @@ import {
   getElapsedSecondsThisMonth,
   calculateEarnings,
   getSalaryPerSecond,
+  getSalaryPerHour,
 } from '@/utils/earnings'
 
 afterEach(() => {
@@ -134,6 +135,30 @@ describe('calculateEarnings', () => {
         totalSecondsInMonth: totalSeconds,
       }),
     ).toBeCloseTo(salary / 30)
+  })
+})
+
+describe('getSalaryPerHour', () => {
+  it('calculates correctly for a 30-day month', () => {
+    const totalSecondsInMonth = 30 * 86400
+    const expected = (3000 / totalSecondsInMonth) * 3600
+
+    expect(getSalaryPerHour({ monthlySalary: 3000, totalSecondsInMonth })).toBeCloseTo(expected)
+  })
+
+  it('calculates correctly for a 31-day month', () => {
+    const totalSecondsInMonth = 31 * 86400
+    const expected = (3000 / totalSecondsInMonth) * 3600
+
+    expect(getSalaryPerHour({ monthlySalary: 3000, totalSecondsInMonth })).toBeCloseTo(expected)
+  })
+
+  it('returns 0 for zero salary', () => {
+    expect(getSalaryPerHour({ monthlySalary: 0, totalSecondsInMonth: 30 * 86400 })).toBe(0)
+  })
+
+  it('returns 0 for negative salary', () => {
+    expect(getSalaryPerHour({ monthlySalary: -500, totalSecondsInMonth: 30 * 86400 })).toBe(0)
   })
 })
 

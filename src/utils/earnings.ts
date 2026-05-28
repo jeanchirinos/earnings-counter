@@ -164,3 +164,17 @@ export function getSalaryPerSecond({
 
   return salaryPerSecond
 }
+
+export function getSalaryPerHour({
+  monthlySalary,
+  totalSecondsInMonth,
+}: {
+  monthlySalary: number
+  totalSecondsInMonth: number
+}): number {
+  const salaryPerSecond = getSalaryPerSecond({ monthlySalary, totalSecondsInMonth })
+
+  const salaryPerHour = salaryPerSecond * 3600
+
+  return salaryPerHour
+}

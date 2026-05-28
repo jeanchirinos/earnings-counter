@@ -9,6 +9,7 @@ import {
   getTotalSecondsInPeriod,
   calculateEarnings,
   getSalaryPerSecond,
+  getSalaryPerHour,
 } from '@/utils/earnings'
 
 export function useEarningsCounter(monthlySalary: Ref<number | null>) {
@@ -38,6 +39,17 @@ export function useEarningsCounter(monthlySalary: Ref<number | null>) {
     })
 
     return salaryPerSecond
+  })
+
+  const salaryPerHour = computed(() => {
+    if (!monthlySalary.value) return 0
+
+    const salaryPerHour = getSalaryPerHour({
+      monthlySalary: monthlySalary.value,
+      totalSecondsInMonth: totalSecondsInMonth.value,
+    })
+
+    return salaryPerHour
   })
 
   let intervalId: ReturnType<typeof setInterval> | null = null
@@ -84,5 +96,5 @@ export function useEarningsCounter(monthlySalary: Ref<number | null>) {
   onUnmounted(stopCounter)
   watch([monthlySalary, schedule, timeframe], updateEarningsState, { deep: true })
 
-  return { earnings, salaryPerSecond, daysInMonth, elapsedSeconds, totalSecondsInPeriod }
+  return { earnings, salaryPerSecond, salaryPerHour, daysInMonth, elapsedSeconds, totalSecondsInPeriod }
 }
