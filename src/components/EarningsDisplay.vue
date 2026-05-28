@@ -4,6 +4,8 @@ import { storeToRefs } from 'pinia'
 import { useSalaryStore } from '@/stores/salary'
 import { useCurrencyStore } from '@/stores/currency'
 import { useEarningsCounter } from '@/composables/useEarningsCounter'
+import { useTimeframeStore } from '@/stores/timeframe'
+import type { Timeframe } from '@/types'
 
 const salaryStore = useSalaryStore()
 const { monthlySalary } = storeToRefs(salaryStore)
@@ -11,7 +13,11 @@ const { monthlySalary } = storeToRefs(salaryStore)
 const currencyStore = useCurrencyStore()
 const { selectedCurrency } = storeToRefs(currencyStore)
 
-const { earnings, salaryPerSecond, salaryPerHour, daysInMonth } = useEarningsCounter(monthlySalary)
+const timeframeStore = useTimeframeStore()
+const { timeframe } = storeToRefs(timeframeStore)
+
+const { earnings, salaryPerSecond, salaryPerHour, daysInMonth, elapsedSeconds, totalSecondsInPeriod } =
+  useEarningsCounter(monthlySalary)
 
 const isPulsing = ref(false)
 
@@ -53,14 +59,43 @@ const perHourFormatted = computed(() =>
 )
 
 const progressPercent = computed(() => {
+  if (!totalSecondsInPeriod.value || totalSecondsInPeriod.value === 0) return 0
   if (!monthlySalary.value) return 0
 
-  const clampedProgressPercent = Math.min((earnings.value / monthlySalary.value) * 100, 100)
+  const clampedProgressPercent = Math.min(
+    (elapsedSeconds.value / totalSecondsInPeriod.value) * 100,
+    100,
+  )
 
   return clampedProgressPercent
 })
 
 const hasSalary = computed(() => monthlySalary.value !== null && monthlySalary.value > 0)
+
+const TIMEFRAMES: { value: Timeframe; label: string }[] = [
+  { value: 'today', label: 'TODAY' },
+  { value: 'week', label: 'THIS WEEK' },
+  { value: 'month', label: 'THIS MONTH' },
+  { value: 'year', label: 'THIS YEAR' },
+]
+
+const earnedLabel = computed(() => {
+  switch (timeframe.value) {
+    case 'today':
+      return 'EARNED TODAY'
+    case 'week':
+      return 'EARNED THIS WEEK'
+    case 'year':
+      return 'EARNED THIS YEAR'
+    case 'month':
+    default:
+      return 'EARNED THIS MONTH'
+  }
+})
+
+function setTimeframe(newTimeframe: Timeframe) {
+  timeframeStore.setTimeframe(newTimeframe)
+}
 </script>
 
 <template>
@@ -94,12 +129,27 @@ const hasSalary = computed(() => monthlySalary.value !== null && monthlySalary.v
           </span>
         </div>
       </div>
-
       <p class="mb-4 text-[0.6rem] tracking-[0.35em] text-cream-muted sm:mb-7 lg:mb-10">
-        EARNED THIS MONTH
+        {{ earnedLabel }}
       </p>
 
-      <div class="mx-auto mb-4 h-8 w-px bg-border sm:mb-7 sm:h-10 lg:mb-10" />
+      <div class="flex justify-center my-5 sm:mb-7 lg:my-10">
+        <div class="flex bg-bg-surface border border-border p-1 rounded-sm">
+          <button
+            v-for="timeframeOption in TIMEFRAMES"
+            :key="timeframeOption.value"
+            class="px-3 py-1 font-mono text-[0.55rem] tracking-[0.2em] transition-colors cursor-pointer sm:px-4 sm:py-1.5 sm:text-[0.6rem]"
+            :class="
+              timeframe === timeframeOption.value
+                ? 'bg-gold text-bg font-medium'
+                : 'text-cream-muted hover:text-cream hover:bg-border/50'
+            "
+            @click="setTimeframe(timeframeOption.value)"
+          >
+            {{ timeframeOption.label }}
+          </button>
+        </div>
+      </div>
 
       <div
         class="mb-6 flex items-center justify-center gap-6 sm:mb-10 sm:gap-10 lg:mb-14 lg:gap-12"

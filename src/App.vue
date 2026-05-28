@@ -28,7 +28,7 @@ onMounted(() => {
     />
 
     <ScheduleSettings
-      class="absolute top-8 right-12 max-sm:top-[4.5rem] max-sm:right-auto max-sm:left-1/2 max-sm:-translate-x-1/2 z-50 animate-fade-in"
+      class="absolute top-8 right-12 max-sm:top-18 max-sm:right-auto max-sm:left-1/2 max-sm:-translate-x-1/2 z-50 animate-fade-in"
     />
 
     <header class="relative z-10 animate-slide-down">
@@ -44,7 +44,7 @@ onMounted(() => {
             >COUNTER</span
           >
         </div>
-        <div class="h-px bg-gradient-to-r from-gold-dim to-transparent" />
+        <div class="h-px bg-linear-to-r from-gold-dim to-transparent" />
       </div>
     </header>
 
