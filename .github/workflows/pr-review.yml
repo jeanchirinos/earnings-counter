@@ -22,7 +22,7 @@ jobs:
 
       - name: Install review dependencies
         working-directory: .github/scripts
-        run: npm install
+        run: npm ci
 
       - name: Run AI review
         working-directory: .github/scripts
