@@ -96,8 +96,13 @@ async function reviewWithGitHubModels() {
 
 const useClaudeApi = Boolean(process.env.ANTHROPIC_API_KEY?.trim())
 
-const { reviewText, provider } = useClaudeApi
-  ? await reviewWithClaude()
-  : await reviewWithGitHubModels()
+try {
+  const { reviewText, provider } = useClaudeApi
+    ? await reviewWithClaude()
+    : await reviewWithGitHubModels()
 
-writeFileSync(outputPath, `## 🤖 AI Code Review (${provider})\n\n${reviewText}`)
+  writeFileSync(outputPath, `## 🤖 AI Code Review (${provider})\n\n${reviewText}`)
+} catch (error) {
+  writeFileSync(outputPath, `## 🤖 AI Code Review\n\n⚠️ Review failed: ${error.message}`)
+  process.exit(1)
+}
