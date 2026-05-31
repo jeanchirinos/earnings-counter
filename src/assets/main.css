@@ -65,6 +65,18 @@
   }
 }
 
+.light {
+  --color-bg: #f4f1e8;
+  --color-bg-surface: #fffdf7;
+  --color-gold: #9a7d28;
+  --color-gold-light: #b8962f;
+  --color-gold-dim: #c9b87a;
+  --color-cream: #2a2620;
+  --color-cream-muted: #6b6354;
+  --color-border: #d8d0bc;
+  --color-error: #b03a3a;
+}
+
 @layer base {
   html {
     font-size: clamp(18px, 1.5vw + 9px, 24px);

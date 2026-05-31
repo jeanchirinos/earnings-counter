@@ -2,9 +2,13 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useScheduleStore } from '@/stores/schedule'
+import { useThemeStore } from '@/stores/theme'
 
 const scheduleStore = useScheduleStore()
 const { schedule } = storeToRefs(scheduleStore)
+
+const themeStore = useThemeStore()
+const { resolvedTheme } = storeToRefs(themeStore)
 
 const isEditing = ref(false)
 const containerRef = ref<HTMLElement | null>(null)
@@ -115,7 +119,8 @@ function updateTime(field: 'startTime' | 'endTime', event: Event): void {
                 type="time"
                 :value="schedule.startTime"
                 required
-                class="w-full bg-transparent px-1 sm:px-2 py-2 font-mono text-[0.8rem] text-cream cursor-pointer outline-none sm:py-2.5 sm:text-[0.9rem] tracking-tighter [color-scheme:dark]"
+                class="w-full bg-transparent px-1 sm:px-2 py-2 font-mono text-[0.8rem] text-cream cursor-pointer outline-none sm:py-2.5 sm:text-[0.9rem] tracking-tighter"
+                :class="resolvedTheme === 'light' ? '[color-scheme:light]' : '[color-scheme:dark]'"
                 @change="updateTime('startTime', $event)"
               />
             </div>
@@ -131,7 +136,8 @@ function updateTime(field: 'startTime' | 'endTime', event: Event): void {
                 type="time"
                 :value="schedule.endTime"
                 required
-                class="w-full bg-transparent px-1 sm:px-2 py-2 font-mono text-[0.8rem] text-cream cursor-pointer outline-none sm:py-2.5 sm:text-[0.9rem] tracking-tighter [color-scheme:dark]"
+                class="w-full bg-transparent px-1 sm:px-2 py-2 font-mono text-[0.8rem] text-cream cursor-pointer outline-none sm:py-2.5 sm:text-[0.9rem] tracking-tighter"
+                :class="resolvedTheme === 'light' ? '[color-scheme:light]' : '[color-scheme:dark]'"
                 @change="updateTime('endTime', $event)"
               />
             </div>

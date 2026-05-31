@@ -7,6 +7,8 @@ export interface Currency {
 
 export type Timeframe = 'today' | 'week' | 'month' | 'year'
 
+export type Theme = 'dark' | 'light' | 'system'
+
 export interface WorkSchedule {
   isActive: boolean
   daysOfWeek: number[] // 0-6 (0 is Sunday, 1 is Monday, etc.)

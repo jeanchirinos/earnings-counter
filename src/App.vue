@@ -3,18 +3,22 @@ import { onMounted } from 'vue'
 import { useSalaryStore } from '@/stores/salary'
 import { useCurrencyStore } from '@/stores/currency'
 import { useScheduleStore } from '@/stores/schedule'
+import { useThemeStore } from '@/stores/theme'
 import EarningsDisplay from '@/components/EarningsDisplay.vue'
 import SalaryInput from '@/components/SalaryInput.vue'
 import ScheduleSettings from '@/components/ScheduleSettings.vue'
+import ThemeToggle from '@/components/ThemeToggle.vue'
 
 const salaryStore = useSalaryStore()
 const currencyStore = useCurrencyStore()
 const scheduleStore = useScheduleStore()
+const themeStore = useThemeStore()
 
 onMounted(() => {
   salaryStore.loadFromStorage()
   currencyStore.loadFromStorage()
   scheduleStore.loadFromStorage()
+  themeStore.loadFromStorage()
 })
 </script>
 
@@ -27,12 +31,10 @@ onMounted(() => {
       aria-hidden="true"
     />
 
-    <ScheduleSettings
-      class="absolute top-8 right-12 max-sm:top-18 max-sm:right-auto max-sm:left-1/2 max-sm:-translate-x-1/2 z-50 animate-fade-in"
-    />
+    <header class="relative z-50 animate-slide-down">
+      <div class="flex items-center justify-between gap-4">
+        <ThemeToggle />
 
-    <header class="relative z-10 animate-slide-down">
-      <div class="flex flex-col items-center gap-4">
         <div class="flex items-center gap-3">
           <span
             class="font-mono text-[0.68rem] max-sm:text-[0.6rem] font-medium tracking-[0.35em] text-gold"
@@ -44,8 +46,11 @@ onMounted(() => {
             >COUNTER</span
           >
         </div>
-        <div class="h-px bg-linear-to-r from-gold-dim to-transparent" />
+
+        <ScheduleSettings />
       </div>
+
+      <div class="mt-4 h-px bg-linear-to-r from-gold-dim to-transparent" />
     </header>
 
     <main
