@@ -2,6 +2,6 @@
   "type": "module",
   "private": true,
   "dependencies": {
-    "@anthropic-ai/sdk": "latest"
+    "@anthropic-ai/sdk": "0.100.1"
   }
 }

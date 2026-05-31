@@ -67,7 +67,7 @@ async function reviewWithClaude() {
 }
 
 async function reviewWithGitHubModels() {
-  const response = await fetch('https://models.inference.ai.azure.com/chat/completions', {
+  const response = await fetch('https://models.github.ai/inference/chat/completions', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -94,7 +94,7 @@ async function reviewWithGitHubModels() {
   return { reviewText, provider: 'GPT-4o (GitHub Models)' }
 }
 
-const useClaudeApi = Boolean(process.env.ANTHROPIC_API_KEY)
+const useClaudeApi = Boolean(process.env.ANTHROPIC_API_KEY?.trim())
 
 const { reviewText, provider } = useClaudeApi
   ? await reviewWithClaude()
