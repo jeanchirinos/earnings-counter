@@ -17,13 +17,7 @@ if (diff.length > MAX_DIFF_CHARS) {
   diff = diff.slice(0, MAX_DIFF_CHARS) + '\n\n... (diff truncated — too large)'
 }
 
-const client = new Anthropic()
-
-const response = await client.messages.create({
-  model: 'claude-sonnet-4-6',
-  max_tokens: 8192,
-  thinking: { type: 'adaptive' },
-  system: `You are a senior software engineer reviewing a Vue 3 + TypeScript project (Pinia, Tailwind v4, Vitest).
+const systemPrompt = `You are a senior software engineer reviewing a Vue 3 + TypeScript project (Pinia, Tailwind v4, Vitest).
 Analyze the git diff and provide clear, actionable feedback.
 
 Focus on:
@@ -40,18 +34,61 @@ Group findings by severity:
 - 🟡 **Warning** — potential problems worth fixing
 - 🟢 **Suggestion** — improvements, style consistency
 
-Only include sections that have findings. If the change looks good, say so briefly.`,
-  messages: [
-    {
-      role: 'user',
-      content: `Review this pull request:\n\n\`\`\`diff\n${diff}\n\`\`\``,
+Only include sections that have findings. If the change looks good, say so briefly.`
+
+const userMessage = `Review this pull request:\n\n\`\`\`diff\n${diff}\n\`\`\``
+
+async function reviewWithClaude() {
+  const client = new Anthropic()
+
+  const response = await client.messages.create({
+    model: 'claude-sonnet-4-6',
+    max_tokens: 8192,
+    thinking: { type: 'adaptive' },
+    system: systemPrompt,
+    messages: [{ role: 'user', content: userMessage }],
+  })
+
+  const reviewText = response.content
+    .filter((block) => block.type === 'text')
+    .map((block) => block.text)
+    .join('\n\n')
+
+  return { reviewText, provider: 'Claude' }
+}
+
+async function reviewWithGitHubModels() {
+  const response = await fetch('https://models.inference.ai.azure.com/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
     },
-  ],
-})
+    body: JSON.stringify({
+      model: 'gpt-4o',
+      max_tokens: 8192,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userMessage },
+      ],
+    }),
+  })
 
-const review = response.content
-  .filter((block) => block.type === 'text')
-  .map((block) => block.text)
-  .join('\n\n')
+  if (!response.ok) {
+    const errorBody = await response.text()
+    throw new Error(`GitHub Models API error ${response.status}: ${errorBody}`)
+  }
 
-writeFileSync(outputPath, `## 🤖 Claude Code Review\n\n${review}`)
+  const data = await response.json()
+  const reviewText = data.choices[0].message.content
+
+  return { reviewText, provider: 'GPT-4o (GitHub Models)' }
+}
+
+const useClaudeApi = Boolean(process.env.ANTHROPIC_API_KEY)
+
+const { reviewText, provider } = useClaudeApi
+  ? await reviewWithClaude()
+  : await reviewWithGitHubModels()
+
+writeFileSync(outputPath, `## 🤖 AI Code Review (${provider})\n\n${reviewText}`)
